@@ -1,49 +1,51 @@
-# Spiking Vocos: 一款高能效神经声码器
+# Spiking Vocos: An Energy-Efficient Neural Vocoder
 
-本仓库是论文 [Spiking Vocos: An Energy-Efficient Neural Vocoder]的官方实现。
+This repository is the official implementation of the paper "Spiking Vocos: An Energy-Efficient Neural Vocoder".
 
-Spiking Vocos 是一款基于脉冲神经网络（SNN）的新型声码器，旨在以超低能耗实现高质量的音频合成。它构建于高效的 [Vocos]框架之上，通过利用 SNN 的事件驱动特性，在保持与原始 Vocos 模型相当的音频质量的同时，显著降低了能量消耗。
+[中文版](./README_zh.md)
 
-## ✨ 主要特性
+Spiking Vocos is a novel vocoder based on Spiking Neural Networks (SNNs), designed to achieve high-quality audio synthesis with ultra-low energy consumption. It is built upon the efficient Vocos framework, and by leveraging the event-driven nature of SNNs, it significantly reduces energy consumption while maintaining audio quality comparable to the original Vocos model.
 
-- **超高能效**: 基于脉冲神经网络（SNN），将高计算量的乘累加（MAC）操作替换为低功耗的累加（AC）操作，非常适合在计算资源受限的边缘设备上部署。
-- **Spiking ConvNeXt 模块**: 设计了专门的 Spiking ConvNeXt 模块，并引入幅度快捷路径（amplitude shortcut path）来缓解 SNN 的信息瓶颈问题，保留关键的信号动态。
-- **自架构蒸馏**: 采用一种自架构知识蒸馏策略，有效将预训练的 ANN 模型（Vocos）的知识迁移到 SNN 学生模型，以弥合性能差距。
-- **时间移位模块 (TSM)**: 集成了轻量级的时间移位模块，以极小的计算开销增强了模型在时间维度上融合信息的能力。
+## ✨ Key Features
 
-## ⚙️ 安装
+- **Ultra-High Energy Efficiency**: Based on Spiking Neural Networks (SNNs), it replaces high-cost Multiply-Accumulate (MAC) operations with low-power Accumulate (AC) operations, making it ideal for deployment on resource-constrained edge devices.
+- **Spiking ConvNeXt Module**: A specialized Spiking ConvNeXt module is designed, and an amplitude shortcut path is introduced to mitigate the information bottleneck issue in SNNs, preserving crucial signal dynamics.
+- **Self-Architectural Distillation**: A self-architectural knowledge distillation strategy is employed to effectively transfer knowledge from a pre-trained ANN model (Vocos) to the SNN student model, bridging the performance gap.
+- **Temporal Shift Module (TSM)**: A lightweight Temporal Shift Module is integrated to enhance the model's ability to fuse information across the temporal dimension with minimal computational overhead.
 
-首先，克隆本仓库到本地：
+## ⚙️ Installation
+
+First, clone this repository to your local machine:
 
 ```bash
 git clone https://github.com/pymaster17/Spiking-Vocos.git
 cd Spiking-Vocos
 ```
 
-然后，建议使用 `uv` 创建虚拟环境并安装依赖。
+Then, it is recommended to create a virtual environment and install dependencies using `uv`.
 
 ```bash
-# 首先，请根据官方指南安装 uv: https://astral.sh/docs/uv/installation
+# First, please install uv according to the official guide: https://astral.sh/docs/uv/installation
 
-# 然后，创建并激活虚拟环境 (需要 Python 3.10)
+# Then, create and activate the virtual environment (Python 3.10 is required)
 uv venv --python 3.10
 source .venv/bin/activate
 
-# 使用 uv sync 安装 pyproject.toml 中定义的依赖
+# Use uv sync to install dependencies defined in pyproject.toml
 uv sync
 ```
 
-这将从 `pyproject.toml` 文件中安装所有必需的库，主要包括 `torch`, `pytorch-lightning` 和 `spikingjelly`。
+This will install all necessary libraries from the `pyproject.toml` file, mainly including `torch`, `pytorch-lightning`, and `spikingjelly`.
 
-## 🚀 使用方法
+## 🚀 Usage
 
-### 推理
+### Inference
 
-你可以使用 `inference.py` 脚本从音频文件重建波形。首先，你需要一个训练好的模型检查点（`.ckpt` 文件）。
+You can use the `inference.py` script to reconstruct waveforms from audio files. First, you need a trained model checkpoint (`.ckpt` file).
 
-1.  准备一个包含待处理音频文件路径的文本文件，例如 `input_filelist.txt`，每行一个文件路径。
+1.  Prepare a text file containing the paths to the audio files to be processed, for example, `input_filelist.txt`, with one file path per line.
 
-2.  运行以下命令进行推理：
+2.  Run the following command for inference:
 
 ```bash
 python inference.py \
@@ -53,15 +55,15 @@ python inference.py \
     --output_dir ./reconstructed_audio/
 ```
 
-其中 `<model_type>` 根据你的模型检查点类型选择，可以是以下几种：
-- `standard`: 标准的 Spiking Vocos 模型。
-- `distill`: 使用了知识蒸馏的模型。
-- `tsm`: 集成了 TSM 模块的模型。
-- `tsm_distill`: 同时使用 TSM 和知识蒸馏的模型。
+Where `<model_type>` is selected based on your model checkpoint type, which can be one of the following:
+- `standard`: The standard Spiking Vocos model.
+- `distill`: The model using knowledge distillation.
+- `tsm`: The model with the TSM module integrated.
+- `tsm_distill`: The model using both TSM and knowledge distillation.
 
-### 脉冲活动可视化
+### Spike Activity Visualization
 
-本仓库还提供了一个强大的可视化工具，可以生成网络中脉冲活动的可视化图像。
+This repository also provides a powerful visualization tool to generate images of spike activity in the network.
 
 ```bash
 python inference.py \
@@ -71,25 +73,25 @@ python inference.py \
     --visualize_spikes \
     --visualize_output_path ./spike_activity.png
 ```
-该命令会随机选择一个输入音频，并生成一个展示网络各层脉冲发放情况的 3D 散点图。
+This command will randomly select an input audio and generate a 3D scatter plot showing the spike firing of each layer in the network.
 
-## 🏋️ 训练
+## 🏋️ Training
 
-模型的训练流程由 `train.py` 脚本和 `configs/` 目录下的 YAML 配置文件控制。
+The model training process is controlled by the `train.py` script and the YAML configuration files in the `configs/` directory.
 
-1.  **准备数据集文件列表**:
-    为你的训练集和验证集创建音频文件列表：
+1.  **Prepare Dataset File Lists**:
+    Create audio file lists for your training and validation sets:
     ```bash
     find /path/to/train-dataset -name *.wav > filelist.train
     find /path/to/val-dataset -name *.wav > filelist.val
     ```
 
-2.  **配置训练参数**:
-    选择一个配置文件（例如 `configs/vocos-spiking.yaml`），并修改其中的 `train_files` 和 `val_files` 路径，指向你刚刚创建的文件列表。你也可以根据需要调整其他超参数。
+2.  **Configure Training Parameters**:
+    Select a configuration file (e.g., `configs/vocos-spiking.yaml`) and modify the `train_files` and `val_files` paths to point to the file lists you just created. You can also adjust other hyperparameters as needed.
 
-3.  **开始训练**:
-    使用以下命令启动训练。训练过程由 PyTorch Lightning 自动管理。
+3.  **Start Training**:
+    Use the following command to start training. The training process is automatically managed by PyTorch Lightning.
     ```bash
     python train.py fit --config configs/vocos-spiking.yaml
     ```
-    你可以根据需要选择不同的配置文件，例如 `vocos-spiking-distill.yaml` 用于训练蒸馏模型。
+    You can choose different configuration files as needed, for example, `vocos-spiking-distill.yaml` for training a distilled model.
