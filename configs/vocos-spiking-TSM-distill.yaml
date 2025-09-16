@@ -1,0 +1,157 @@
+# pytorch_lightning==1.8.6
+seed_everything: 4444
+trainer:
+  logger:
+    class_path: pytorch_lightning.loggers.TensorBoardLogger
+    init_args:
+      save_dir: logs/
+      name: spikingv3-TSM-distill
+      version: null
+      log_graph: false
+      default_hp_metric: true
+      prefix: ''
+      sub_dir: null
+      logdir: null
+      comment: ''
+      purge_step: null
+      max_queue: 10
+      flush_secs: 120
+      filename_suffix: ''
+      write_to_disk: true
+      comet_config:
+        disabled: true
+  enable_checkpointing: true
+  callbacks:
+  - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+    init_args:
+      logging_interval: null
+      log_momentum: false
+  - class_path: pytorch_lightning.callbacks.ModelSummary
+    init_args:
+      max_depth: 2
+  - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+    init_args:
+      dirpath: null
+      filename: vocos_distill_checkpoint_{epoch}_{step}_{val_loss:.4f}
+      monitor: val_loss
+      verbose: false
+      save_last: true
+      save_top_k: 3
+      save_weights_only: false
+      mode: min
+      auto_insert_metric_name: true
+      every_n_train_steps: null
+      train_time_interval: null
+      every_n_epochs: null
+      save_on_train_epoch_end: null
+  - class_path: vocos.helpers.GradNormCallback
+  default_root_dir: null
+  gradient_clip_val: null
+  gradient_clip_algorithm: null
+  num_nodes: 1
+  num_processes: null
+  devices:
+  - 0
+  gpus: null
+  auto_select_gpus: false
+  tpu_cores: null
+  ipus: null
+  enable_progress_bar: true
+  overfit_batches: 0.0
+  track_grad_norm: -1
+  check_val_every_n_epoch: 1
+  fast_dev_run: false
+  accumulate_grad_batches: null
+  max_epochs: null
+  min_epochs: null
+  max_steps: 2000000
+  min_steps: null
+  max_time: null
+  limit_train_batches: null
+  limit_val_batches: 100
+  limit_test_batches: null
+  limit_predict_batches: null
+  val_check_interval: null
+  log_every_n_steps: 100
+  accelerator: gpu
+  strategy: ddp
+  sync_batchnorm: false
+  precision: 32
+  enable_model_summary: true
+  num_sanity_val_steps: 2
+  resume_from_checkpoint: null
+  profiler: null
+  benchmark: null
+  deterministic: null
+  reload_dataloaders_every_n_epochs: 0
+  auto_lr_find: false
+  replace_sampler_ddp: true
+  detect_anomaly: false
+  auto_scale_batch_size: false
+  plugins: null
+  amp_backend: native
+  amp_level: null
+  move_metrics_to_cpu: false
+  multiple_trainloader_mode: max_size_cycle
+  inference_mode: true
+model:
+  class_path: vocos.experiment_TSM_distill.VocosDistillExp
+  init_args:
+    feature_extractor:
+      class_path: vocos.feature_extractors.MelSpectrogramFeatures
+      init_args:
+        sample_rate: 24000
+        n_fft: 1024
+        hop_length: 256
+        n_mels: 100
+        padding: center
+    backbone:
+      class_path: vocos.spiking_modelsv3_TSM_distill.SpikingVocosBackbone
+      init_args:
+        input_channels: 100
+        dim: 512
+        intermediate_dim: 1536
+        num_layers: 8
+        snn_timestep: 4
+        layer_scale_init_value: null
+        adanorm_num_embeddings: null
+        channel_folding_factor: 32
+        tsm_penalty_factor: 0.5
+    head:
+      class_path: vocos.heads.ISTFTHead
+      init_args:
+        dim: 512
+        n_fft: 1024
+        hop_length: 256
+        padding: center
+    sample_rate: 24000
+    initial_learning_rate: 0.0005
+    teacher_model_path: logs/vocos/version_0
+    phase_loss_coeff: 0.05
+    feature_distill_coeff: 40.0
+    output_distill_coeff: 10.0
+    num_warmup_steps: 0
+    mel_loss_coeff: 45.0
+    mrd_loss_coeff: 0.1
+    pretrain_mel_steps: 0
+    decay_mel_coeff: false
+    evaluate_utmos: true
+    evaluate_pesq: true
+    evaluate_periodicty: true
+data:
+  class_path: vocos.dataset.VocosDataModule
+  init_args:
+    train_params:
+      filelist_path: ./filelist.train
+      sampling_rate: 24000
+      num_samples: 16384
+      batch_size: 16
+      num_workers: 8
+    val_params:
+      filelist_path: ./filelist.val
+      sampling_rate: 24000
+      num_samples: 48384
+      batch_size: 16
+      num_workers: 8
+optimizer: null
+lr_scheduler: null

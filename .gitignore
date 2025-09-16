@@ -1,4 +1,6 @@
 __pycache__/
 logs/
-*.wav
 .venv
+*.ckpt
+*.pt
+/hifigan

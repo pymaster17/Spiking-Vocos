@@ -1,0 +1,89 @@
+# pytorch_lightning==1.8.6
+seed_everything: 4444
+
+data:
+  class_path: vocos.dataset.VocosDataModule
+  init_args:
+    train_params:
+      filelist_path: ./filelist.train
+      sampling_rate: 24000
+      num_samples: 16384
+      batch_size: 16
+      num_workers: 8
+
+    val_params:
+      filelist_path: ./filelist.val
+      sampling_rate: 24000
+      num_samples: 48384
+      batch_size: 16
+      num_workers: 8
+
+model:
+  class_path: vocos.experiment.VocosExp
+  init_args:
+    sample_rate: 24000
+    initial_learning_rate: 5e-4
+    mel_loss_coeff: 45
+    mrd_loss_coeff: 0.1
+    num_warmup_steps: 0 
+    pretrain_mel_steps: 0
+
+    evaluate_utmos: true
+    evaluate_pesq: true
+    evaluate_periodicty: true
+
+    feature_extractor:
+      class_path: vocos.feature_extractors.MelSpectrogramFeatures
+      init_args:
+        sample_rate: 24000
+        n_fft: 1024
+        hop_length: 256
+        n_mels: 100
+        padding: center
+
+    backbone:
+      # 确保 class_path 指向您保存新代码的文件
+      class_path: vocos.spiking_modelsv3_TSM.SpikingVocosBackbone
+      init_args:
+        input_channels: 100
+        dim: 512
+        intermediate_dim: 1536
+        num_layers: 8
+        snn_timestep: 4
+        # --- Temporal Shift Module 参数 ---
+        channel_folding_factor: 32
+        tsm_penalty_factor: 0.5
+
+    head:
+      class_path: vocos.heads.ISTFTHead
+      init_args:
+        dim: 512
+        n_fft: 1024
+        hop_length: 256
+        padding: center
+
+trainer:
+  logger:
+    class_path: pytorch_lightning.loggers.TensorBoardLogger
+    init_args:
+      save_dir: logs/
+      name: spikingv3-TSM
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+    - class_path: pytorch_lightning.callbacks.ModelSummary
+      init_args:
+        max_depth: 2
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        monitor: val_loss
+        filename: vocos_checkpoint_{epoch}_{step}_{val_loss:.4f}
+        save_top_k: 3
+        save_last: true
+    - class_path: vocos.helpers.GradNormCallback
+
+  max_steps: 2000000
+  limit_val_batches: 100
+  accelerator: gpu
+  strategy: ddp
+  devices: [0]
+  log_every_n_steps: 100

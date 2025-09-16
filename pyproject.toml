@@ -1,0 +1,28 @@
+[project]
+name = "vocos"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "einops>=0.8.1",
+    "encodec>=0.1.1",
+    "fairseq>=0.12.2",
+    "huggingface-hub>=0.34.4",
+    "jsonargparse[signatures]>=4.41.0",
+    "librosa>=0.11.0",
+    "matplotlib>=3.10.6",
+    "numpy>=2.2.6",
+    "pesq>=0.0.4",
+    "pytorch-lightning==1.8.6",
+    "pyyaml>=6.0.2",
+    "scipy>=1.15.3",
+    "speechbrain>=1.0.3",
+    "spikingjelly>=0.0.0.0.14",
+    "tensorboard>=2.20.0",
+    "torch==2.5.1",
+    "torchaudio==2.5.1",
+    "torchcrepe>=0.0.24",
+    "torchvision==0.20.1",
+    "transformers>=4.56.1",
+]
